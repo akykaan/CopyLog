@@ -119,7 +119,7 @@ function CardItems({
       {/* İçerik - Tooltiplerin Altında */}
       <div className="min-w-0 text-left">
         <div className="font-mono text-sm break-all">
-          <pre className="whitespace-pre-wrap text-gray-200">{item.text}</pre>
+          <pre className="no-drag whitespace-pre-wrap text-gray-200">{item.text}</pre>
         </div>
       </div>
     </div>

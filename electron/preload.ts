@@ -32,4 +32,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
       callback(text);
     });
   },
+  minimizeWindow: () => electron.ipcRenderer.send("minimize-window"),
+  maximizeWindow: () => electron.ipcRenderer.send("maximize-window"),
+  closeWindow: () => electron.ipcRenderer.send("close-window"),
 });

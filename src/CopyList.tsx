@@ -74,6 +74,18 @@ function CopyList() {
     });
   }, []);
 
+  const handleMinimize = () => {
+    window.electron?.minimizeWindow();
+  };
+
+  const handleMaximize = () => {
+    window.electron?.maximizeWindow();
+  };
+
+  const handleClose = () => {
+    window.electron?.closeWindow();
+  };
+
   return (
     <TooltipProvider>
       <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900 via-gray-900 to-black">
@@ -83,25 +95,17 @@ function CopyList() {
               <div className="flex items-center space-x-3">
                 <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
                 <span className="text-sm font-medium text-gray-200">
-                  Clipboard Manager
+                  CopyLog
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  // onClick={() => setIsMaximized(!isMaximized)}
-                >
+                <Button variant="ghost" size="icon" onClick={handleMinimize}>
                   <Minus className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" onClick={handleMaximize}>
                   <Square className="w-4 h-4" />
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => window.close()}
-                >
+                <Button variant="destructive" size="icon" onClick={handleClose}>
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -111,7 +115,7 @@ function CopyList() {
             <div
               className="p-4 mb-4 max-h-[calc(100vh-180px)] overflow-y-auto
               bg-gradient-to-b from-transparent to-gray-900/20
-              min-h-[200px] 
+              min-h-[200px]
             scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-700 hover:scrollbar-thumb-gray-400"
             >
               <div className="space-y-3">

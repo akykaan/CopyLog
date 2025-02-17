@@ -4,6 +4,9 @@ export interface ElectronAPI {
   send: (channel: string, ...args: unknown[]) => void;
   invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
   onClipboardUpdate: (callback: (text: string) => void) => void;
+  minimizeWindow: () => void;
+  maximizeWindow: () => void;
+  closeWindow: () => void;
 }
 
 declare global {

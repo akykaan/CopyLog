@@ -1,5 +1,12 @@
 import { react } from "@vitejs/plugin-react";
-import { app, BrowserWindow, globalShortcut, clipboard } from "electron";
+import {
+  app,
+  BrowserWindow,
+  globalShortcut,
+  clipboard,
+  Menu,
+  ipcMain,
+} from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -27,16 +34,38 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
     },
-    // autoHideMenuBar: true,
-    // alwaysOnTop: true,
-    x: 1100, // Ekranın sol üst köşesine yerleştir
-    y: 0,
-    width: 800, // Pencere genişliği (örneğin 800px)
-    height: 600, // Pencere yüksekliği (örneğin 600px)
-    frame: false, // Pencere çerçevesini gizle
-    roundedCorners: true, // Yuvarlatılmış köşeleri etkinleştir
-    transparent: true, // Pencereyi saydam yap
+    x: 1000,
+    y: 20,
+    width: 800,
+    height: 600,
+    frame: false,
+    transparent: true,
   });
+
+  // win.setBackgroundColor("transparent")
+
+  // const menu = Menu.buildFromTemplate([
+  //   {
+  //     label: "Edit",
+  //     submenu: [
+  //       {
+  //         label: "Always On Top",
+  //         type: "checkbox",
+  //         click: (menuItem, browserWindow) => {
+  //           if (browserWindow) {
+  //             console.log(browserWindow.isAlwaysOnTop());
+  //             const isAlwaysOnTop = !browserWindow.isAlwaysOnTop();
+  //             browserWindow.setAlwaysOnTop(isAlwaysOnTop);
+  //             menuItem.checked = isAlwaysOnTop;
+  //           }
+  //         },
+  //       },
+  //     ],
+  //   },
+  // ]);
+
+  // win.setMenu(menu);
+
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
@@ -47,6 +76,23 @@ function createWindow() {
   } else {
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
   }
+
+  // Window control process
+  ipcMain.on("minimize-window", () => {
+    win!.minimize();
+  });
+
+  ipcMain.on("maximize-window", () => {
+    if (win!.isMaximized()) {
+      win!.unmaximize();
+    } else {
+      win!.maximize();
+    }
+  });
+
+  ipcMain.on("close-window", () => {
+    win!.close();
+  });
 }
 
 app.on("window-all-closed", () => {

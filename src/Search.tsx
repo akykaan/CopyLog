@@ -19,9 +19,9 @@ const SearchComp = React.memo(function SearchSearchComp({
         <Input
           type="text"
           onChange={(e) => setSearchQuery(e.target.value.trim())}
-          placeholder="Search clipboard... (Ctrl+F)"
+          placeholder="Search clipboard..."
           // className="mb-4 mt-4 h-[50px] w-[550px] pl-9"
-          className="pl-9 bg-gray-900/30 border-gray-700/50 focus-visible:ring-blue-400/50"
+          className="no-drag pl-9 bg-gray-900/30 border-gray-700/50 focus-visible:ring-blue-400/50"
         />
       </div>
     </div>

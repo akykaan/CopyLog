@@ -30,5 +30,8 @@ electron.contextBridge.exposeInMainWorld("electron", {
     electron.ipcRenderer.on("clipboard-update", (_, text) => {
       callback(text);
     });
-  }
+  },
+  minimizeWindow: () => electron.ipcRenderer.send("minimize-window"),
+  maximizeWindow: () => electron.ipcRenderer.send("maximize-window"),
+  closeWindow: () => electron.ipcRenderer.send("close-window")
 });
