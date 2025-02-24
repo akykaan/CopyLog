@@ -88,9 +88,9 @@ function CopyList() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900 via-gray-900 to-black">
-        <div className="min-h-screen backdrop-blur-xl bg-black/20 p-4 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjEiIGZpbGw9IiNmZmZmZmYxMCIvPjwvc3ZnPg==')] bg-repeat">
-          <div className="max-w-2xl mx-auto rounded-2xl bg-gray-800/30 shadow-lg border border-gray-700/50 overflow-hidden backdrop-blur-3xl transform transition-all duration-200">
+      <div className="h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900 via-gray-900 to-black">
+        <div className="h-full backdrop-blur-xl bg-black/20 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiI+PGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjEiIGZpbGw9IiNmZmZmZmYxMCIvPjwvc3ZnPg==')] bg-repeat">
+          <div className="h-full bg-gray-800/30 shadow-lg border border-gray-700/50 backdrop-blur-3xl transform transition-all duration-200">
             <div className="px-4 py-2 bg-gray-900/50 border-b border-gray-700/50 flex items-center justify-between backdrop-blur-xl bg-gradient-to-r from-gray-900/50 to-gray-800/50">
               <div className="flex items-center space-x-3">
                 <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
@@ -112,12 +112,7 @@ function CopyList() {
             </div>
 
             <SearchComp setSearchQuery={setSearchQuery} />
-            <div
-              className="p-4 mb-4 max-h-[calc(100vh-180px)] overflow-y-auto
-              bg-gradient-to-b from-transparent to-gray-900/20
-              min-h-[200px]
-            scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-700 hover:scrollbar-thumb-gray-400"
-            >
+            <div className="p-4 mb-4 scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-700 hover:scrollbar-thumb-gray-400">
               <div className="space-y-3">
                 {filteredHistory.length > 0 ? (
                   filteredHistory.map((item, index) => (
@@ -131,7 +126,7 @@ function CopyList() {
                     </div>
                   ))
                 ) : (
-                  <div className="w-full h-[200px] text-gray-400">
+                  <div className="w-full bg-transparent text-gray-400">
                     No items found
                   </div>
                 )}
