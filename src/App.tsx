@@ -1,4 +1,4 @@
-import CopyList from "./CopyList";
+import CopyList from "./screens/CopyList";
 
 function App() {
   return <CopyList />;

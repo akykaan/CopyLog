@@ -1,11 +1,14 @@
-import { useState } from "react";
 import { Check, Copy, Pin, PinOff, Trash2 } from "lucide-react";
-import { Button } from "./components/ui/button";
+import { Button } from "../components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "./components/ui/tooltip";
+} from "../components/ui/tooltip";
+import { useDispatch } from "react-redux";
+import { RootState } from "@/store";
+import { useSelector } from "react-redux";
+import { resetCopyStatus, setCopyStatus } from "@/features/copyItemSlice";
 
 interface CardItemsProps {
   item: { id: string; text: string; pinned: boolean };
@@ -20,24 +23,20 @@ function CardItems({
   handleDelete,
   handlePinCopyItem,
 }: CardItemsProps) {
-  const [isCopy, setIsCopy] = useState<{ [key: string]: boolean }>({});
+  const dispatch = useDispatch();
+  const isCopy = useSelector((state: RootState) => state.copy.isCopy);
 
-  const handleOnClickCopyIcon = (item: string, index: number) => {
+  const handleOnClickCopyIcon = (
+    item: { id: string; text: string; pinned: boolean },
+    index: number
+  ) => {
     navigator.clipboard
-      .writeText(item)
+      .writeText(item.text)
       .then(() => {
-        setIsCopy((prev) => ({
-          ...prev,
-          [index]: true,
-        }));
-
+        dispatch(setCopyStatus({ id: index, status: item.pinned }));
         setTimeout(() => {
-          setIsCopy((prev) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { [index]: _, ...rest } = prev;
-            return rest;
-          });
-        }, 2000);
+          dispatch(resetCopyStatus({ id: index }));
+        }, 3000);
       })
       .catch((err) => {
         console.error("Kopyalama işlemi başarısız:", err);
@@ -98,7 +97,7 @@ function CardItems({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleOnClickCopyIcon(item.text, index)}
+              onClick={() => handleOnClickCopyIcon(item, index)}
             >
               {isCopy[index] ? (
                 <Check color="green" />
@@ -106,7 +105,7 @@ function CardItems({
                 <div className="relative group">
                   <Copy
                     className="w-4 h-4"
-                    onClick={() => handleOnClickCopyIcon(item.text, index)}
+                    onClick={() => handleOnClickCopyIcon(item, index)}
                   />
                 </div>
               )}
@@ -119,7 +118,9 @@ function CardItems({
       {/* İçerik - Tooltiplerin Altında */}
       <div className="min-w-0 text-left">
         <div className="font-mono text-sm break-all">
-          <pre className="no-drag whitespace-pre-wrap text-gray-200">{item.text}</pre>
+          <pre className="no-drag whitespace-pre-wrap text-gray-200">
+            {item.text}
+          </pre>
         </div>
       </div>
     </div>

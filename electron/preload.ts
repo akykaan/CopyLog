@@ -1,5 +1,4 @@
 import electron from "electron";
-import { getHeapStatistics } from "process";
 
 const allowedChannels = ["clipboard-update"];
 

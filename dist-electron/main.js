@@ -10,6 +10,7 @@ const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
+app.commandLine.appendSwitch("disable-gpu");
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
@@ -20,8 +21,8 @@ function createWindow() {
     y: 20,
     width: 800,
     height: 600,
-    frame: false,
-    transparent: true,
+    // frame: false,
+    // transparent: true,
     alwaysOnTop: true
   });
   win.webContents.on("did-finish-load", () => {
