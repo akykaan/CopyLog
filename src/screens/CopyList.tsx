@@ -1,22 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { Minus, Sparkles, Square, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 import CardItems from "@/screens/CardItems";
-import { useWindowManager } from "@/hooks/useWindowManager";
 import { RootState } from "@/store";
-import { addItem, deleteItem, togglePin } from "@/features/clipBoard";
+import {
+  addItem,
+  copyBoardSlice,
+  deleteItem,
+  togglePin,
+} from "@/features/clipBoard";
 import SearchComp from "./Search";
+import Header from "./Header";
 
 function CopyList() {
   const [searchQuery, setSearchQuery] = useState("");
-  const clipboardHistoryX = useSelector(
-    (state: RootState) => state.board.items
-  );
   const dispatch = useDispatch();
-  const { minimize, maximize, close } = useWindowManager();
+
+  const clipboardHistory = useSelector((state: RootState) =>
+    copyBoardSlice.selectors.selectClipboardItems({ clipboard: state.board })
+  );
 
   useEffect(() => {
     const handleClipboardUpdate = (text: string) => {
@@ -41,12 +44,12 @@ function CopyList() {
 
   const filteredHistory = useMemo(() => {
     if (searchQuery.trim() === "") {
-      return clipboardHistoryX;
+      return clipboardHistory;
     }
-    return clipboardHistoryX.filter((item) =>
+    return clipboardHistory.filter((item) =>
       item.text.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [clipboardHistoryX, searchQuery]);
+  }, [clipboardHistory, searchQuery]);
 
   const handlePinCopyItem = useCallback(
     (id: string) => {
@@ -54,28 +57,6 @@ function CopyList() {
     },
     [dispatch]
   );
-
-  const Header = () => {
-    return (
-      <div className="px-4 py-2 bg-gray-900/50 border-b border-gray-700/50 flex items-center justify-between backdrop-blur-xl bg-gradient-to-r from-gray-900/50 to-gray-800/50">
-        <div className="flex items-center space-x-3">
-          <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
-          <span className="text-sm font-medium text-gray-200">CopyLog</span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" onClick={minimize}>
-            <Minus className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={maximize}>
-            <Square className="w-4 h-4" />
-          </Button>
-          <Button variant="destructive" size="icon" onClick={close}>
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    );
-  };
 
   const Body = () => {
     return (

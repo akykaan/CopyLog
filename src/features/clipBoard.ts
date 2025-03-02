@@ -37,6 +37,7 @@ export const copyBoardSlice = createSlice({
       const newHistory = state.items;
       const itemId = newHistory.findIndex((item) => item.id === action.payload);
       newHistory.splice(itemId, 1);
+      // state.items = state.items.filter((item) => item.id !== action.payload);
     },
     togglePin: (state, action) => {
       const itemId = state.items.findIndex(
@@ -48,6 +49,9 @@ export const copyBoardSlice = createSlice({
         : { ...item, pinned: true };
       state.items = sortHistory(state.items);
     },
+  },
+  selectors: {
+    selectClipboardItems: (state) => state.items,
   },
 });
 
