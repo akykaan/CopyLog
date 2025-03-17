@@ -8,10 +8,12 @@ interface ClipboardItem {
 
 interface ClipboardState {
   items: ClipboardItem[];
+  searchText: string;
 }
 
 const initialState: ClipboardState = {
   items: [],
+  searchText: "",
 };
 
 const sortHistory = (items: ClipboardItem[]) => {
@@ -21,10 +23,12 @@ const sortHistory = (items: ClipboardItem[]) => {
 };
 
 export const copyBoardSlice = createSlice({
-  name: "clipboard",
+  name: "board",
   initialState,
   reducers: {
     addItem: (state, action: PayloadAction<ClipboardItem>) => {
+      console.log("addItem", action.payload);
+
       const isTextDuplicate = state.items.some(
         (item) => item.text === action.payload.text
       );
@@ -49,12 +53,25 @@ export const copyBoardSlice = createSlice({
         : { ...item, pinned: true };
       state.items = sortHistory(state.items);
     },
+    setSearchText: (state, action: PayloadAction<string>) => {
+      state.searchText = action.payload;
+    },
   },
   selectors: {
-    selectClipboardItems: (state) => state.items,
+    selectClipboardItems: (state: ClipboardState) => state.items,
+    selectFilteredItems: (state) => {
+      if (state.searchText.trim() === "") {
+        return state.items;
+      }
+      return state.items.filter((item) =>
+        item.text.toLowerCase().includes(state.searchText.toLowerCase())
+      );
+    },
+    selectSearchText: (state) => state.searchText,
   },
 });
 
-export const { addItem, deleteItem, togglePin } = copyBoardSlice.actions;
+export const { addItem, deleteItem, togglePin, setSearchText } =
+  copyBoardSlice.actions;
 
 export default copyBoardSlice.reducer;

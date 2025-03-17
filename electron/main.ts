@@ -1,17 +1,13 @@
-import { react } from "@vitejs/plugin-react";
 import {
   app,
   BrowserWindow,
   globalShortcut,
   clipboard,
-  Menu,
   ipcMain,
 } from "electron";
-import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // The built directory structure
@@ -42,34 +38,11 @@ function createWindow() {
     height: 600,
     // frame: false,
     // transparent: true,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
   });
 
-  // win.setBackgroundColor("transparent")
+  win.webContents.openDevTools();
 
-  // const menu = Menu.buildFromTemplate([
-  //   {
-  //     label: "Edit",
-  //     submenu: [
-  //       {
-  //         label: "Always On Top",
-  //         type: "checkbox",
-  //         click: (menuItem, browserWindow) => {
-  //           if (browserWindow) {
-  //             console.log(browserWindow.isAlwaysOnTop());
-  //             const isAlwaysOnTop = !browserWindow.isAlwaysOnTop();
-  //             browserWindow.setAlwaysOnTop(isAlwaysOnTop);
-  //             menuItem.checked = isAlwaysOnTop;
-  //           }
-  //         },
-  //       },
-  //     ],
-  //   },
-  // ]);
-
-  // win.setMenu(menu);
-
-  // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
