@@ -51,7 +51,7 @@ function CardItems() {
   );
 
   return (
-    <div>
+    <div key={filteredHistory.length} className="w-full">
       {filteredHistory.length === 0 ? (
         <div className="w-full bg-transparent text-gray-400">
           No items found
@@ -76,17 +76,21 @@ function CardItems() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(item.id)}
-                    className={`cursor-pointer ${
-                      item.pinned
-                        ? "opacity-50 hover:opacity-50 transition-opacity duration-300 ease-in-out pointer-events-none"
-                        : "opacity-100 hover:opacity-50 transition-opacity duration-300 ease-in-out pointer-events-auto"
-                    }`}
+                    onClick={() => handleOnClickCopyIcon(item, index)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    {isCopy[index] ? (
+                      <Check color="green" />
+                    ) : (
+                      <div className="relative group">
+                        <Copy
+                          className="w-4 h-4"
+                          onClick={() => handleOnClickCopyIcon(item, index)}
+                        />
+                      </div>
+                    )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Delete</TooltipContent>
+                <TooltipContent>Copy to clipboard</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -112,21 +116,17 @@ function CardItems() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleOnClickCopyIcon(item, index)}
+                    onClick={() => handleDelete(item.id)}
+                    className={`cursor-pointer ${
+                      item.pinned
+                        ? "opacity-50 hover:opacity-50 transition-opacity duration-300 ease-in-out pointer-events-none"
+                        : "opacity-100 hover:opacity-50 transition-opacity duration-300 ease-in-out pointer-events-auto"
+                    }`}
                   >
-                    {isCopy[index] ? (
-                      <Check color="green" />
-                    ) : (
-                      <div className="relative group">
-                        <Copy
-                          className="w-4 h-4"
-                          onClick={() => handleOnClickCopyIcon(item, index)}
-                        />
-                      </div>
-                    )}
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Copy to clipboard</TooltipContent>
+                <TooltipContent>Delete</TooltipContent>
               </Tooltip>
             </div>
 

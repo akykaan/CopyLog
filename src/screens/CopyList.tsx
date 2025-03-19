@@ -6,13 +6,17 @@ import { addItem } from "@/features/clipBoard";
 import SearchComp from "./Search";
 import Header from "./Header";
 import Body from "./Body";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 function CopyList() {
   const dispatch = useDispatch();
 
-  // const clipboardHistory = useSelector((state: RootState) =>
-  //   copyBoardSlice.selectors.selectClipboardItems({ board: state.board })
-  // );
+  const items = useSelector((state: RootState) => state.board.items);
+
+  useEffect(() => {
+    window.electron?.sendStateToMain({ board: { items } });
+  }, [items]);
 
   useEffect(() => {
     const handleClipboardUpdate = (text: string) => {
@@ -27,15 +31,6 @@ function CopyList() {
     };
     window.electron?.onClipboardUpdate(handleClipboardUpdate);
   }, []);
-
-  // const filteredHistory = useMemo(() => {
-  //   if (searchQuery.trim() === "") {
-  //     return clipboardHistory;
-  //   }
-  //   return clipboardHistory.filter((item) =>
-  //     item.text.toLowerCase().includes(searchQuery.toLowerCase())
-  //   );
-  // }, [clipboardHistory, searchQuery]);
 
   return (
     <TooltipProvider>

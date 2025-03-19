@@ -3,17 +3,17 @@ import {
   BrowserWindow,
   globalShortcut,
   clipboard,
+  screen,
   ipcMain,
 } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { store } from "../src/store";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// The built directory structure
 process.env.APP_ROOT = path.join(__dirname, "..");
 
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 export const MAIN_DIST = path.join(process.env.APP_ROOT, "dist-electron");
 export const RENDERER_DIST = path.join(process.env.APP_ROOT, "dist");
@@ -23,8 +23,9 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   : RENDERER_DIST;
 
 let win: BrowserWindow | null;
+let panelWindow: BrowserWindow | null;
+let sharedState: any = null;
 
-app.commandLine.appendSwitch("disable-gpu");
 
 function createWindow() {
   win = new BrowserWindow({
@@ -36,50 +37,121 @@ function createWindow() {
     y: 20,
     width: 800,
     height: 600,
-    // frame: false,
-    // transparent: true,
     alwaysOnTop: false,
+    frame: false,
+    transparent: true,
   });
 
-  win.webContents.openDevTools();
-
-  win.webContents.on("did-finish-load", () => {
-    win?.webContents.send("main-process-message", new Date().toLocaleString());
-  });
+  // win.webContents.openDevTools();
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
   }
+}
 
-  // Window control process
-  ipcMain.on("minimize-window", () => {
-    win!.minimize();
+// Window control process
+ipcMain.on("minimize-window", () => {
+  win!.minimize();
+});
+
+ipcMain.on("maximize-window", () => {
+  if (win!.isMaximized()) {
+    win!.unmaximize();
+  } else {
+    win!.maximize();
+  }
+});
+
+ipcMain.on("close-window", () => {
+  win!.close();
+});
+
+function createPanelWindow(mousePosition: Electron.Point) {
+  if (panelWindow) {
+    panelWindow.setBounds({
+      x: mousePosition.x,
+      y: mousePosition.y,
+      width: 300,
+      height: 400,
+    });
+    panelWindow.focus();
+    return;
+  }
+
+  panelWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
+    x: mousePosition.x,
+    y: mousePosition.y,
+    frame: false,
+    alwaysOnTop: false,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.mjs"),
+    },
   });
 
-  ipcMain.on("maximize-window", () => {
-    if (win!.isMaximized()) {
-      win!.unmaximize();
-    } else {
-      win!.maximize();
-    }
+  // panelWindow.webContents.openDevTools();
+
+  if (VITE_DEV_SERVER_URL) {
+    panelWindow.loadURL(`${VITE_DEV_SERVER_URL}modal`);
+  } else {
+    panelWindow.loadFile(path.join(RENDERER_DIST, "index.html"), {
+      search: "route=/modal",
+    });
+  }
+
+  panelWindow.on("closed", () => {
+    panelWindow = null;
   });
 
-  ipcMain.on("close-window", () => {
-    win!.close();
+  panelWindow.on("blur", () => {
+    panelWindow?.close();
   });
 }
+
+ipcMain.on("send-state-to-main", (event, state) => {
+  sharedState = state; // State'i sakla
+});
+
+ipcMain.handle("get-state-from-main", () => {
+  return sharedState;
+});
+
+
+app.disableHardwareAcceleration();
+app.commandLine.appendSwitch("enable-webgl");
+
+app.whenReady().then(() => {
+  createWindow();
+  const gpuStatus = app.getGPUFeatureStatus();
+  console.log('GPU Feature Status:', gpuStatus);
+
+  globalShortcut.register("CommandOrControl+B", () => {
+    const mousePosition = screen.getCursorScreenPoint();
+    createPanelWindow(mousePosition);
+  });
+
+  let lastText = clipboard.readText();
+
+  setInterval(() => {
+    const currentText = clipboard.readText();
+    if (currentText && currentText !== lastText) {
+      lastText = currentText;
+      win?.webContents.send("clipboard-update", currentText);
+    }
+  }, 250);
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
-    win = null;
   }
 });
 
 app.on("will-quit", () => {
-  globalShortcut.unregisterAll(); // Tüm kısayolları temizle
+  globalShortcut.unregisterAll();
 });
 
 app.on("activate", () => {
@@ -88,18 +160,7 @@ app.on("activate", () => {
   }
 });
 
-// Uygulama hazır olduğunda kısa yolları kaydet
-app.whenReady().then(() => {
-  createWindow();
-
-  let lastText = clipboard.readText();
-
-  setInterval(() => {
-    const currentText = clipboard.readText();
-    if (currentText && currentText !== lastText) {
-      lastText = currentText;
-      console.log("lastText11:", currentText);
-      win?.webContents.send("clipboard-update", currentText);
-    }
-  }, 250);
+ipcMain.handle("get-clipboard-history", async () => {
+  const state = store.getState();
+  return state.board.items;
 });

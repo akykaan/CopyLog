@@ -7,6 +7,9 @@ export interface ElectronAPI {
   minimizeWindow: () => void;
   maximizeWindow: () => void;
   closeWindow: () => void;
+  getClipboardHistory: () => Promise<unknown[]>;
+  sendStateToMain: (state: any) => void;
+  getStateFromMain: () => Promise<any>;
 }
 
 declare global {

@@ -34,4 +34,11 @@ electron.contextBridge.exposeInMainWorld("electron", {
   minimizeWindow: () => electron.ipcRenderer.send("minimize-window"),
   maximizeWindow: () => electron.ipcRenderer.send("maximize-window"),
   closeWindow: () => electron.ipcRenderer.send("close-window"),
+
+  getClipboardHistory: () =>
+    electron.ipcRenderer.invoke("get-clipboard-history"),
+
+  sendStateToMain: (state: any) =>
+    electron.ipcRenderer.send("send-state-to-main", state),
+  getStateFromMain: () => electron.ipcRenderer.invoke("get-state-from-main"),
 });
