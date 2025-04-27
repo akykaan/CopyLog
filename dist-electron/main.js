@@ -1930,7 +1930,6 @@ const copyBoardSlice = createSlice({
   initialState: initialState$1,
   reducers: {
     addItem: (state, action) => {
-      console.log("addItem", action.payload);
       const isTextDuplicate = state.items.some(
         (item) => item.text === action.payload.text
       );
@@ -2014,41 +2013,48 @@ function createWindow() {
     height: 600,
     alwaysOnTop: false,
     frame: false,
-    transparent: true
+    autoHideMenuBar: true,
+    movable: true
   });
+  if (process.env.NODE_ENV === "development") {
+    win.webContents.openDevTools();
+  }
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    const filePath = path.join(__dirname, "../dist/index.html");
+    win.loadFile(filePath);
   }
 }
 ipcMain.on("minimize-window", () => {
-  win.minimize();
+  if (win) {
+    win.minimize();
+  }
 });
 ipcMain.on("maximize-window", () => {
-  if (win.isMaximized()) {
+  if (win && win.isMaximized()) {
     win.unmaximize();
-  } else {
+  } else if (win) {
     win.maximize();
   }
 });
 ipcMain.on("close-window", () => {
-  win.close();
+  if (win) {
+    win.close();
+  }
 });
 function createPanelWindow(mousePosition) {
   if (panelWindow) {
     panelWindow.setBounds({
       x: mousePosition.x,
-      y: mousePosition.y,
-      width: 300,
-      height: 400
+      y: mousePosition.y
     });
     panelWindow.focus();
     return;
   }
   panelWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 300,
+    height: 500,
     x: mousePosition.x,
     y: mousePosition.y,
     frame: false,
@@ -2057,11 +2063,15 @@ function createPanelWindow(mousePosition) {
       preload: path.join(__dirname, "preload.mjs")
     }
   });
+  if (process.env.NODE_ENV === "development") {
+    panelWindow.webContents.openDevTools();
+  }
   if (VITE_DEV_SERVER_URL) {
-    panelWindow.loadURL(`${VITE_DEV_SERVER_URL}modal`);
+    panelWindow.loadURL(`${VITE_DEV_SERVER_URL}#/modal`);
   } else {
     panelWindow.loadFile(path.join(RENDERER_DIST, "index.html"), {
-      search: "route=/modal"
+      // search: "route=/modal", // browserRouter
+      hash: "#/modal"
     });
   }
   panelWindow.on("closed", () => {
@@ -2071,7 +2081,7 @@ function createPanelWindow(mousePosition) {
     panelWindow == null ? void 0 : panelWindow.close();
   });
 }
-ipcMain.on("send-state-to-main", (event, state) => {
+ipcMain.on("send-state-to-main", (_, state) => {
   sharedState = state;
 });
 ipcMain.handle("get-state-from-main", () => {
@@ -2081,8 +2091,6 @@ app.disableHardwareAcceleration();
 app.commandLine.appendSwitch("enable-webgl");
 app.whenReady().then(() => {
   createWindow();
-  const gpuStatus = app.getGPUFeatureStatus();
-  console.log("GPU Feature Status:", gpuStatus);
   globalShortcut.register("CommandOrControl+B", () => {
     const mousePosition = screen.getCursorScreenPoint();
     createPanelWindow(mousePosition);

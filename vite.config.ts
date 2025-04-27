@@ -4,11 +4,13 @@ import electron from "vite-plugin-electron/simple";
 import react from "@vitejs/plugin-react";
 import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "tailwindcss";
+import renderer from "vite-plugin-electron-renderer";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    renderer(),
     tsConfigPaths(),
     electron({
       main: {
@@ -43,6 +45,7 @@ export default defineConfig({
       external: ["electron"],
     },
   },
+  base: "./",
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

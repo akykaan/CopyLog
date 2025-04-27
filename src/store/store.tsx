@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import clipBoardReducer from "./features/clipBoard";
-import copyReducer from "./features/copyItemSlice";
+import clipBoardReducer from "../features/clipBoard";
+import copyReducer from "../features/copyItemSlice";
 
 export const store = configureStore({
   reducer: {

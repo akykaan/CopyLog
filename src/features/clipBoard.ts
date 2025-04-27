@@ -1,17 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface ClipboardItem {
+export interface ClipboardItem {
   id: string;
   text: string;
   pinned: boolean;
 }
 
-interface ClipboardState {
+export interface ClipboardState {
   items: ClipboardItem[];
   searchText: string;
 }
 
-const initialState: ClipboardState = {
+export const initialState: ClipboardState = {
   items: [],
   searchText: "",
 };
@@ -27,8 +27,6 @@ export const copyBoardSlice = createSlice({
   initialState,
   reducers: {
     addItem: (state, action: PayloadAction<ClipboardItem>) => {
-      console.log("addItem", action.payload);
-
       const isTextDuplicate = state.items.some(
         (item) => item.text === action.payload.text
       );

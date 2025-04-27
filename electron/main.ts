@@ -8,7 +8,7 @@ import {
 } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { store } from "../src/store";
+import { store } from "../src/store/store";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -24,8 +24,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
 
 let win: BrowserWindow | null;
 let panelWindow: BrowserWindow | null;
-let sharedState: any = null;
-
+let sharedState: Record<string, unknown> | null = null;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -39,33 +38,43 @@ function createWindow() {
     height: 600,
     alwaysOnTop: false,
     frame: false,
-    transparent: true,
+    autoHideMenuBar: true,
+    movable: true,
   });
 
-  // win.webContents.openDevTools();
+  if (process.env.NODE_ENV === "development") {
+    win.webContents.openDevTools();
+  }
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
-    win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    // win.loadFile(path.join(RENDERER_DIST, "dist/index.html"));
+    // win.loadURL("file://" + path.join(__dirname, "../dist/index.html"));
+    const filePath = path.join(__dirname, "../dist/index.html");
+    win.loadFile(filePath);
   }
 }
 
 // Window control process
 ipcMain.on("minimize-window", () => {
-  win!.minimize();
+  if (win) {
+    win.minimize();
+  }
 });
 
 ipcMain.on("maximize-window", () => {
-  if (win!.isMaximized()) {
-    win!.unmaximize();
-  } else {
-    win!.maximize();
+  if (win && win.isMaximized()) {
+    win.unmaximize();
+  } else if (win) {
+    win.maximize();
   }
 });
 
 ipcMain.on("close-window", () => {
-  win!.close();
+  if (win) {
+    win.close();
+  }
 });
 
 function createPanelWindow(mousePosition: Electron.Point) {
@@ -73,16 +82,14 @@ function createPanelWindow(mousePosition: Electron.Point) {
     panelWindow.setBounds({
       x: mousePosition.x,
       y: mousePosition.y,
-      width: 300,
-      height: 400,
     });
     panelWindow.focus();
     return;
   }
 
   panelWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 300,
+    height: 500,
     x: mousePosition.x,
     y: mousePosition.y,
     frame: false,
@@ -92,13 +99,17 @@ function createPanelWindow(mousePosition: Electron.Point) {
     },
   });
 
-  // panelWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV === "development") {
+    panelWindow.webContents.openDevTools();
+  }
 
   if (VITE_DEV_SERVER_URL) {
-    panelWindow.loadURL(`${VITE_DEV_SERVER_URL}modal`);
+    // panelWindow.loadURL(`${VITE_DEV_SERVER_URL}modal`);
+    panelWindow.loadURL(`${VITE_DEV_SERVER_URL}#/modal`); // hashRouter
   } else {
     panelWindow.loadFile(path.join(RENDERER_DIST, "index.html"), {
-      search: "route=/modal",
+      // search: "route=/modal", // browserRouter
+      hash: "#/modal",
     });
   }
 
@@ -111,22 +122,19 @@ function createPanelWindow(mousePosition: Electron.Point) {
   });
 }
 
-ipcMain.on("send-state-to-main", (event, state) => {
-  sharedState = state; // State'i sakla
+ipcMain.on("send-state-to-main", (_, state) => {
+  sharedState = state;
 });
 
 ipcMain.handle("get-state-from-main", () => {
   return sharedState;
 });
 
-
 app.disableHardwareAcceleration();
 app.commandLine.appendSwitch("enable-webgl");
 
 app.whenReady().then(() => {
   createWindow();
-  const gpuStatus = app.getGPUFeatureStatus();
-  console.log('GPU Feature Status:', gpuStatus);
 
   globalShortcut.register("CommandOrControl+B", () => {
     const mousePosition = screen.getCursorScreenPoint();
