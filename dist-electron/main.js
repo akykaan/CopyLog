@@ -2011,14 +2011,11 @@ function createWindow() {
     y: 20,
     width: 800,
     height: 600,
-    alwaysOnTop: false,
+    alwaysOnTop: true,
     frame: false,
     autoHideMenuBar: true,
     movable: true
   });
-  if (process.env.NODE_ENV === "development") {
-    win.webContents.openDevTools();
-  }
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
@@ -2063,9 +2060,6 @@ function createPanelWindow(mousePosition) {
       preload: path.join(__dirname, "preload.mjs")
     }
   });
-  if (process.env.NODE_ENV === "development") {
-    panelWindow.webContents.openDevTools();
-  }
   if (VITE_DEV_SERVER_URL) {
     panelWindow.loadURL(`${VITE_DEV_SERVER_URL}#/modal`);
   } else {

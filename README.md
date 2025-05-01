@@ -13,6 +13,10 @@ A powerful and minimal clipboard history manager for better productivity.
 ✔ One-click copy and delete options
 
 ✔ Minimal and user-friendly interface
+
+✔ Quick Access with Mini Panel
+Press Ctrl + B to open a floating mini panel at your mouse position — without fully launching the app. This panel lets you instantly view, copy, or delete recent clipboard entries, helping you stay focused and efficient.
+
 ## Installation
 
 Clone the repository:
@@ -32,5 +36,6 @@ The copied items appear in the app, where you can pin, delete, or copy them agai
 All saved items will remain available until the app is closed.
 Use the search bar to quickly find previous clipboard entries.
 ```
+# ShowCase
+![CopyLog Demo](./src/assets/CopyLog.gif)
 
-  
