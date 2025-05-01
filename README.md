@@ -14,8 +14,7 @@ A powerful and minimal clipboard history manager for better productivity.
 
 ✔ Minimal and user-friendly interface
 
-✔ Quick Access with Mini Panel
-Press Ctrl + B to open a floating mini panel at your mouse position — without fully launching the app. This panel lets you instantly view, copy, or delete recent clipboard entries, helping you stay focused and efficient.
+✔ Press Ctrl + B to open a floating mini panel at your mouse position — even when the app is running in the background. This panel lets you instantly view and copy recent clipboard entries, helping you stay focused and efficient.
 
 ## Installation
 
