@@ -14,14 +14,15 @@ export const copyItemSlice = createSlice({
   reducers: {
     setCopyStatus: (
       state,
-      action: PayloadAction<{ id: number; status: boolean }>
+      action: PayloadAction<{ id: string; status: boolean }>
     ) => {
       const { id, status } = action.payload;
       state.isCopy[id] = !status;
     },
-    resetCopyStatus: (state, action: PayloadAction<{ id: number }>) => {
-      const { [action.payload.id]: _, ...rest } = state.isCopy;
-      state.isCopy = { ...rest };
+    resetCopyStatus: (state, action: PayloadAction<{ id: string }>) => {
+      const next = { ...state.isCopy };
+      delete next[action.payload.id];
+      state.isCopy = next;
     },
   },
 });

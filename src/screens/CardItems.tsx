@@ -13,16 +13,17 @@ function CardItems() {
   );
   const isCopy = useSelector((state: RootState) => state.copy.isCopy);
 
-  const handleCopy = (
-    item: { id: string; text: string; pinned: boolean },
-    index: number
-  ) => {
+  const handleCopy = (item: {
+    id: string;
+    text: string;
+    pinned: boolean;
+  }) => {
     navigator.clipboard
       .writeText(item.text)
       .then(() => {
-        dispatch(setCopyStatus({ id: index, status: item.pinned }));
+        dispatch(setCopyStatus({ id: item.id, status: item.pinned }));
         setTimeout(() => {
-          dispatch(resetCopyStatus({ id: index }));
+          dispatch(resetCopyStatus({ id: item.id }));
         }, 3000);
       })
       .catch((err) => {
@@ -52,7 +53,7 @@ function CardItems() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 mb-4">
-          {filteredHistory.map((item, index) => (
+          {filteredHistory.map((item) => (
             <div
               key={item.id}
               className={`no-drag p-4 rounded-xl bg-gray-800 hover:bg-gray-800/40
@@ -67,10 +68,10 @@ function CardItems() {
             >
               <div className="flex justify-between items-center mb-3">
                 <button
-                  onClick={() => handleCopy(item, index)}
+                  onClick={() => handleCopy(item)}
                   className="p-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
                 >
-                  {isCopy[index] ? (
+                  {isCopy[item.id] ? (
                     <Check className="w-4 h-4 text-green-400" />
                   ) : (
                     <Copy className="w-4 h-4" />

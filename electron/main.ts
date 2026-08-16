@@ -8,7 +8,16 @@ import {
 } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { store } from "../src/store/store";
+import squirrelStartup from "electron-squirrel-startup";
+import {
+  isSharedStatePayload,
+  MAX_CLIPBOARD_READ_LENGTH,
+  SharedStatePayload,
+} from "../src/types/ipc";
+
+if (squirrelStartup) {
+  app.quit();
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -22,33 +31,43 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
   ? path.join(process.env.APP_ROOT, "public")
   : RENDERER_DIST;
 
+const webPreferences = {
+  preload: path.join(__dirname, "preload.mjs"),
+  contextIsolation: true,
+  sandbox: true,
+  nodeIntegration: false,
+  nodeIntegrationInWorker: false,
+  webSecurity: true,
+};
+
 let win: BrowserWindow | null;
 let panelWindow: BrowserWindow | null;
-let sharedState: Record<string, unknown> | null = null;
+let sharedState: SharedStatePayload | null = null;
+let alwaysOnTopEnabled = false;
+
+function denyWindowOpen(contents: Electron.WebContents) {
+  contents.setWindowOpenHandler(() => ({ action: "deny" }));
+}
 
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
-    webPreferences: {
-      preload: path.join(__dirname, "preload.mjs"),
-    },
+    webPreferences,
     x: 1000,
     y: 20,
     width: 800,
     height: 600,
-    alwaysOnTop: true,
+    alwaysOnTop: alwaysOnTopEnabled,
     frame: false,
     autoHideMenuBar: true,
     movable: true,
   });
 
-  // win.webContents.openDevTools();
+  denyWindowOpen(win.webContents);
 
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
-    // win.loadFile(path.join(RENDERER_DIST, "dist/index.html"));
-    // win.loadURL("file://" + path.join(__dirname, "../dist/index.html"));
     const filePath = path.join(__dirname, "../dist/index.html");
     win.loadFile(filePath);
   }
@@ -75,6 +94,15 @@ ipcMain.on("close-window", () => {
   }
 });
 
+ipcMain.handle("set-always-on-top", (_event, enabled: unknown) => {
+  if (typeof enabled !== "boolean") {
+    return false;
+  }
+  alwaysOnTopEnabled = enabled;
+  win?.setAlwaysOnTop(enabled);
+  return true;
+});
+
 function createPanelWindow(mousePosition: Electron.Point) {
   if (panelWindow) {
     panelWindow.setBounds({
@@ -92,19 +120,15 @@ function createPanelWindow(mousePosition: Electron.Point) {
     y: mousePosition.y,
     frame: false,
     alwaysOnTop: false,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.mjs"),
-    },
+    webPreferences,
   });
 
-  // panelWindow.webContents.openDevTools();
+  denyWindowOpen(panelWindow.webContents);
 
   if (VITE_DEV_SERVER_URL) {
-    // panelWindow.loadURL(`${VITE_DEV_SERVER_URL}modal`);
     panelWindow.loadURL(`${VITE_DEV_SERVER_URL}#/modal`); // hashRouter
   } else {
     panelWindow.loadFile(path.join(RENDERER_DIST, "index.html"), {
-      // search: "route=/modal", // browserRouter
       hash: "#/modal",
     });
   }
@@ -118,8 +142,10 @@ function createPanelWindow(mousePosition: Electron.Point) {
   });
 }
 
-ipcMain.on("send-state-to-main", (_, state) => {
-  sharedState = state;
+ipcMain.on("send-state-to-main", (_event, state: unknown) => {
+  if (isSharedStatePayload(state)) {
+    sharedState = state;
+  }
 });
 
 ipcMain.handle("get-state-from-main", () => {
@@ -127,7 +153,6 @@ ipcMain.handle("get-state-from-main", () => {
 });
 
 app.disableHardwareAcceleration();
-app.commandLine.appendSwitch("enable-webgl");
 
 app.whenReady().then(() => {
   createWindow();
@@ -141,7 +166,11 @@ app.whenReady().then(() => {
 
   setInterval(() => {
     const currentText = clipboard.readText();
-    if (currentText && currentText !== lastText) {
+    if (
+      currentText &&
+      currentText.length <= MAX_CLIPBOARD_READ_LENGTH &&
+      currentText !== lastText
+    ) {
       lastText = currentText;
       win?.webContents.send("clipboard-update", currentText);
     }
@@ -162,9 +191,4 @@ app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
-});
-
-ipcMain.handle("get-clipboard-history", async () => {
-  const state = store.getState();
-  return state.board.items;
 });

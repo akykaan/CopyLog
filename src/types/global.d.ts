@@ -1,3 +1,5 @@
+import type { SharedStatePayload } from "./ipc";
+
 export interface ElectronAPI {
   on: (channel: string, listener: (...args: unknown[]) => void) => void;
   off: (channel: string, listener: (...args: unknown[]) => void) => void;
@@ -7,9 +9,9 @@ export interface ElectronAPI {
   minimizeWindow: () => void;
   maximizeWindow: () => void;
   closeWindow: () => void;
-  getClipboardHistory: () => Promise<unknown[]>;
-  sendStateToMain: (state: any) => void;
-  getStateFromMain: () => Promise<any>;
+  setAlwaysOnTop: (enabled: boolean) => Promise<unknown>;
+  sendStateToMain: (state: SharedStatePayload) => void;
+  getStateFromMain: () => Promise<SharedStatePayload | null>;
 }
 
 declare global {

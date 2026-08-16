@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import path from "node:path";
 import electron from "vite-plugin-electron/simple";
 import react from "@vitejs/plugin-react";
@@ -6,12 +6,26 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import tailwindcss from "tailwindcss";
 import renderer from "vite-plugin-electron-renderer";
 
+const CSP_META =
+  '<meta http-equiv="Content-Security-Policy" content="default-src \'self\'; script-src \'self\'; style-src \'self\' \'unsafe-inline\'; img-src \'self\' data:; font-src \'self\' data:; connect-src \'self\'" />';
+
+function cspPlugin(): Plugin {
+  return {
+    name: "inject-csp",
+    apply: "build",
+    transformIndexHtml(html: string) {
+      return html.replace("<head>", `<head>\n    ${CSP_META}`);
+    },
+  };
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     renderer(),
     tsConfigPaths(),
+    cspPlugin(),
     electron({
       main: {
         // Shortcut of `build.lib.entry`.

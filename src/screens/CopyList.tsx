@@ -29,7 +29,7 @@ function CopyList() {
       dispatch(addItem(data));
     };
     window.electron?.onClipboardUpdate(handleClipboardUpdate);
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
