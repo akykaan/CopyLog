@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { MAX_ITEMS, MAX_TEXT_LENGTH } from "../types/ipc";
 
 export interface ClipboardItem {
   id: string;
@@ -27,19 +28,31 @@ export const copyBoardSlice = createSlice({
   initialState,
   reducers: {
     addItem: (state, action: PayloadAction<ClipboardItem>) => {
-      const isTextDuplicate = state.items.some(
-        (item) => item.text === action.payload.text
-      );
+      const text =
+        action.payload.text.length > MAX_TEXT_LENGTH
+          ? action.payload.text.slice(0, MAX_TEXT_LENGTH)
+          : action.payload.text;
+
+      const isTextDuplicate = state.items.some((item) => item.text === text);
 
       if (!isTextDuplicate) {
-        state.items.unshift(action.payload);
+        state.items.unshift({ ...action.payload, text });
+        if (state.items.length > MAX_ITEMS) {
+          const overflow = state.items.length - MAX_ITEMS;
+          const removableIds = new Set(
+            state.items
+              .filter((item) => !item.pinned)
+              .slice(-overflow)
+              .map((item) => item.id)
+          );
+          state.items = state.items.filter((item) => !removableIds.has(item.id));
+        }
       }
     },
     deleteItem: (state, action) => {
-      const newHistory = state.items;
-      const itemId = newHistory.findIndex((item) => item.id === action.payload);
-      newHistory.splice(itemId, 1);
-      // state.items = state.items.filter((item) => item.id !== action.payload);
+      const itemId = state.items.findIndex((item) => item.id === action.payload);
+      if (itemId === -1) return;
+      state.items.splice(itemId, 1);
     },
     togglePin: (state, action) => {
       const itemId = state.items.findIndex(

@@ -1,4 +1,5 @@
 import electron from "electron";
+import type { SharedStatePayload } from "../src/types/ipc";
 
 const allowedChannels = ["clipboard-update"];
 
@@ -34,11 +35,11 @@ electron.contextBridge.exposeInMainWorld("electron", {
   minimizeWindow: () => electron.ipcRenderer.send("minimize-window"),
   maximizeWindow: () => electron.ipcRenderer.send("maximize-window"),
   closeWindow: () => electron.ipcRenderer.send("close-window"),
+  setAlwaysOnTop: (enabled: boolean) =>
+    electron.ipcRenderer.invoke("set-always-on-top", enabled),
 
-  getClipboardHistory: () =>
-    electron.ipcRenderer.invoke("get-clipboard-history"),
-
-  sendStateToMain: (state: any) =>
+  sendStateToMain: (state: SharedStatePayload) =>
     electron.ipcRenderer.send("send-state-to-main", state),
-  getStateFromMain: () => electron.ipcRenderer.invoke("get-state-from-main"),
+  getStateFromMain: (): Promise<SharedStatePayload | null> =>
+    electron.ipcRenderer.invoke("get-state-from-main"),
 });

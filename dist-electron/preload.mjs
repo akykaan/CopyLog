@@ -34,7 +34,7 @@ electron.contextBridge.exposeInMainWorld("electron", {
   minimizeWindow: () => electron.ipcRenderer.send("minimize-window"),
   maximizeWindow: () => electron.ipcRenderer.send("maximize-window"),
   closeWindow: () => electron.ipcRenderer.send("close-window"),
-  getClipboardHistory: () => electron.ipcRenderer.invoke("get-clipboard-history"),
+  setAlwaysOnTop: (enabled) => electron.ipcRenderer.invoke("set-always-on-top", enabled),
   sendStateToMain: (state) => electron.ipcRenderer.send("send-state-to-main", state),
   getStateFromMain: () => electron.ipcRenderer.invoke("get-state-from-main")
 });

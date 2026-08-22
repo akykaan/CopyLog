@@ -17,7 +17,7 @@ function Panel() {
 
     const fetchState = async () => {
       const state = await window.electron?.getStateFromMain();
-      if (isMounted) {
+      if (isMounted && state) {
         setClipboarditems(state.board.items);
       }
     };
@@ -28,12 +28,12 @@ function Panel() {
     };
   }, []);
 
-  const handleCopy = async (item: ClipboardItem, index: number) => {
+  const handleCopy = async (item: ClipboardItem) => {
     try {
       await navigator.clipboard.writeText(item.text);
-      dispatch(setCopyStatus({ id: index, status: item.pinned }));
+      dispatch(setCopyStatus({ id: item.id, status: item.pinned }));
       setTimeout(() => {
-        dispatch(resetCopyStatus({ id: index }));
+        dispatch(resetCopyStatus({ id: item.id }));
       }, 3000);
     } catch (err) {
       console.error("Kopyalama işlemi başarısız:", err);
@@ -43,7 +43,7 @@ function Panel() {
   return (
     <div className="no-drag min-h-screen bg-gray-900 text-gray-100">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 mb-4">
-        {clipboarditems?.map((item, index) => (
+        {clipboarditems?.map((item) => (
           <div
             key={item.id}
             className={`p-4 rounded-xl bg-gray-800 hover:bg-gray-800/40
@@ -58,10 +58,10 @@ function Panel() {
           >
             <div className="flex justify-between items-center mb-3">
               <button
-                onClick={() => handleCopy(item, index)}
+                onClick={() => handleCopy(item)}
                 className="p-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700"
               >
-                {isCopy[index] ? (
+                {isCopy[item.id] ? (
                   <Check className="w-4 h-4 text-green-400" />
                 ) : (
                   <Copy className="w-4 h-4" />
